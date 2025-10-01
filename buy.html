@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Buy eBook | eBookNest</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="buy.css" />
+</head>
+<body>
+  <div class="container">
+    <h1>Complete Your Purchase</h1>
+
+    <div class="payment-box">
+      <div class="qr-section">
+        <img src="" alt="Scan QR to Pay" />
+        <p><strong>UPI ID:</strong> </p>
+        <p>Scan QR or pay using the UPI ID</p>
+      </div>
+
+      <div class="form-section">
+        <h2>Payment Confirmation</h2>
+        <form action="https://formsubmit.co/Buisness@devamedianetwork.com" method="POST">
+          <input type="text" name="name" placeholder="Your Name" required />
+          <input type="email" name="email" placeholder="Your Email" required />
+          <input type="text" name="transaction_id" placeholder="Transaction ID / UPI Ref No." required />
+          <textarea name="message" rows="4" placeholder="Anything you'd like to add..."></textarea>
+
+          <input type="hidden" name="_captcha" value="false">
+          <input type="hidden" name="_subject" value="New Payment Submission">
+
+          <button type="submit">Submit Payment Info</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
