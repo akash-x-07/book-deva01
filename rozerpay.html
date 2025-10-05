@@ -3,42 +3,91 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>eBookNest — Pay to Buy</title>
+  <title>eBookNest — Buy Now</title>
   <link rel="stylesheet" href="rozerpay.css" />
   <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 </head>
 <body>
   <section class="cta-section">
-    <div class="cta-content">
-      <h2 class="cta-heading">Ready to Transform Your Life?</h2>
-      <p class="cta-subheading">
-        Download your free Gen Z Mindset eBook now and start your journey toward clarity and success!
-      </p>
+    <div class="card">
+      <img src="teen.jpg" alt="Teen to Millionaire eBook" class="ebook-image" />
+      <h2 class="cta-heading">Teen to Millionaire</h2>
+
       <div class="cta-buttons">
-        <a href="GenZMindset.pdf" download class="cta-button">📘 Download Now</a>
-        <button class="cta-button buy-button" onclick="payNow(599)">💻 Buy e-Book ₹599</button>
-        <button class="cta-button hard-button" onclick="payNow(899)">📚 Buy Hard Copy ₹899</button>
+        <button class="cta-button buy-button" id="buyButton">Buy Now — ₹599</button>
       </div>
     </div>
   </section>
 
   <script>
-    function payNow(amount) {
-      var options = {
-        key: "rzp_test_YOUR_KEY_HERE",  
-        amount: amount * 100,           
-        currency: "INR", 
-        name: "eBookNest",
-        description: amount === 599 ? "Gen Z Mindset eBook" : "Gen Z Mindset Hard Copy",
-        image: "logo.png",
-        theme: { color: "#00c3ff" },
-        handler: function(response) {
-          alert("Payment successful! ID: " + response.razorpay_payment_id);
-          window.location.href = "thankyou.html";
-        }
-      };
-      var rzp = new Razorpay(options);
-      rzp.open();
+    // ✅ Check login
+    const buyButton = document.getElementById("buyButton");
+    const isLoggedIn = localStorage.getItem("isLoggedIn");
+
+    if(!isLoggedIn){
+      buyButton.disabled = true;
+      buyButton.style.opacity = 0.6;
+      buyButton.textContent = "Login to Buy";
+      buyButton.addEventListener("click", () => {
+        alert("❌ Please login first to buy this eBook.");
+        window.location.href = "login.html";
+      });
+    } else {
+      buyButton.disabled = false;
+      buyButton.style.opacity = 1;
+      buyButton.textContent = "Buy Now — ₹599";
+      buyButton.addEventListener("click", payNow);
+    }
+
+    // ✅ Razorpay Payment
+    async function payNow() {
+      const amount = 599;
+      try {
+        const orderRes = await fetch("http://localhost:3000/create-order", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ amount: amount * 100 })
+        });
+        const order = await orderRes.json();
+
+        const options = {
+          key: "rzp_live_YOUR_KEY_ID",
+          amount: order.amount,
+          currency: "INR",
+          name: "eBookNest",
+          description: "Teen to Millionaire eBook",
+          image: "logo.png",
+          order_id: order.id,
+          handler: async function(response) {
+            const verifyRes = await fetch("http://localhost:3000/verify-payment", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(response)
+            });
+            const verifyData = await verifyRes.json();
+
+            if (verifyData.status === "success") {
+              alert("✅ Payment Successful! ID: " + response.razorpay_payment_id);
+              window.location.href = "ebook-download.html"; 
+            } else {
+              alert("❌ Payment verification failed!");
+            }
+          },
+          prefill: {
+            name: "Customer",
+            email: localStorage.getItem("userEmail") || "customer@example.com",
+            contact: "9999999999"
+          },
+          theme: { color: "#00c3ff" }
+        };
+
+        const rzp = new Razorpay(options);
+        rzp.open();
+
+      } catch (error) {
+        console.error("Payment error:", error);
+        alert("Something went wrong, please try again.");
+      }
     }
   </script>
 </body>
